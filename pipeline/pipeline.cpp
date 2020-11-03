@@ -2,119 +2,105 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace std;
 
 struct pipe                                         //труба
 {
-    unsigned int id;                                //идентификатор
-    float size_l;                                   //длина
-    unsigned int size_w;                            //диаметр
+    int id;                                //идентификатор
+    float length;                                   //длина
+    int diameter;                            //диаметр
     bool work;                                      //работает или нет
 };
 
 struct compressor_station                           //компрессорная станция(кс)
 {
-    unsigned int id;                                //идентификатор
+    int id;                                //идентификатор
     string name;                                    //имя
-    unsigned int manufactory;                       //колич. цехов
-    unsigned int manufactory_w;                     //колич. рабочих цехов
-    float efficiency;                        //эффективность
+    int manufactory;                       //колич. цехов
+    int manufactory_w;                     //колич. рабочих цехов
+    float efficiency;                               //эффективность
 };
 
-void CheckInt(unsigned int &a)                                                      //проверка на целое число(int)
+template <typename T>
+
+T GetCorrectNumber(T left, T right)
 {
-    cin >> a;
-    if (cin.fail()) {
+    T x;
+    while (((cin >> x)).fail() || x<left || x>right)
+    {
         cin.clear();
-        while (cin.get() != '\n');                                      //очищаем введенные значения
-        cout << "Введите в следующий раз целое число!" << endl;
-        system("pause");
-        CheckInt(a);
-    };
-};
+        cin.ignore(10000, '\n');
+        cout << "Ошибка при вводе!" << endl << "Введите команду: ";
+    }
+    return x;
+}
 
-void CheckFloat(float& a)                                                 //проверка на число с запятой(float)
-{
-    cin >> a;
-    if (cin.fail()) {
-        cin.clear();
-        while (cin.get() != '\n');                                          //очищаем введенные значения
-        cout << "Введите в следующий раз число!" << endl;
-        system("pause");
-        CheckFloat(a);
-    };
-};
 
-void CheckBool(bool& a)                                                 //проверка на булевское значение(float)
-{
-    cin >> a;
-    if (cin.fail()) {
-        cin.clear();
-        while (cin.get() != '\n');                                          //очищаем введенные значения
-        cout << "Введите в следующий 1 или 0!" << endl;
-        system("pause");
-        CheckBool(a);
-    };
-};
-
-void Menu()                                         //Меню
+void Menu()                                         
 {
     system("CLS");
     cout << "1.Добавить трубу" << endl
         << "2.Добавит КС" << endl
-        << "3.Просмотр всех объектов" << endl
-        << "4.Редактировать трубу" << endl
-        << "5.Редактировать КС" << endl
-        << "6.Сохранить" << endl
-        << "7.Загрузить" << endl
+        << "3.Просмотр трубы" << endl
+        << "4.Просмотр КС" << endl
+        << "5.Редактировать трубу" << endl
+        << "6.Редактировать КС" << endl
+        << "7.Сохранить трубу" << endl
+        << "8.Сохранить КС" << endl
+        << "9.Загрузить трубу" << endl
+        << "10.Загрузить КС" << endl
         << "0.Выход" << endl;
 };
 
-void PlusPipe(pipe &pipe_i)
+pipe PlusPipe()
 {
+    pipe pipe_i;
     cout << "Введите идентификатор - ";
-    CheckInt(pipe_i.id);
+    pipe_i.id = GetCorrectNumber(0,100000);
     cout << "Введите длину(м) - ";
-    CheckFloat(pipe_i.size_l);
+    pipe_i.length = GetCorrectNumber(0,200);
     cout << "Введите диаметр(мм) - ";
-    CheckInt(pipe_i.size_w);
+    pipe_i.diameter = GetCorrectNumber(0,200);
     cout << "Введите 1, если труба работает или 0 - если труба не работает - ";
-    CheckBool(pipe_i.work);
+    pipe_i.work = GetCorrectNumber(-1,2);
+    return pipe_i;
 };
 
-void PlusCS(compressor_station &CS_i)
+compressor_station PlusCS()
 {
+    compressor_station CS_i;
     cout << "Введите идентификатор - ";
-    CheckInt(CS_i.id);
+    CS_i.id = GetCorrectNumber(0,100000);
     cout << "Введите название - ";
-    cin >> CS_i.name;
+    cin.ignore();
+    getline(cin, CS_i.name);
     cout << "Введите количество цехов - ";
-    CheckInt(CS_i.manufactory);
+    CS_i.manufactory = GetCorrectNumber(0, 100000);
     cout << "Введите количество рабочих цехов - ";
-    CheckInt(CS_i.manufactory_w);
+    CS_i.manufactory_w = GetCorrectNumber(0,100000);
     cout << "Введите эффективность - ";
-    CheckFloat(CS_i.efficiency);
-    if (CS_i.efficiency > 1 || CS_i.efficiency < 0) {
-        cout << "Введите в следующий раз значение от 0 до 1!" << endl;
-        system("Pause");
-        PlusCS(CS_i);
-    }
+    CS_i.efficiency = GetCorrectNumber(0,1);
+    return CS_i;
 };
 
-void Viewer(pipe& pipe_i, compressor_station& CS_i)
+void ViewerPipe(const pipe& pipe_i)
 {
-    if (pipe_i.size_w != 0) {
+    if (pipe_i.diameter != 0) {
         cout << "Труба:" << endl;
         cout << "Идентификатор - " << pipe_i.id << endl;
-        cout << "Длина(м) - " << pipe_i.size_l << endl;
-        cout << "Диаметр(мм) - " << pipe_i.size_w << endl;
+        cout << "Длина(м) - " << pipe_i.length << endl;
+        cout << "Диаметр(мм) - " << pipe_i.diameter << endl;
         cout << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
     }
     else {
-        cout << "Нет введенных данных"<<endl<<endl;
+        cout << "Нет введенных данных!" << endl << endl;
     }
+};
 
+void ViewerCS(const compressor_station & CS_i)
+{
     if (CS_i.id != 0) {
     cout << "Компрессорная станция:" << endl;
     cout << "Идентификатор - " << CS_i.id << endl;
@@ -124,24 +110,54 @@ void Viewer(pipe& pipe_i, compressor_station& CS_i)
     cout << "Эффективность - " << CS_i.efficiency << endl;
     }
     else {
-        cout << "Нет введенных данных" << endl << endl;
+        cout << "Нет введенных данных!" << endl << endl;
     }
 };
 
-void Keep(pipe& pipe_i, compressor_station& CS_i)
+void EditPipe(pipe& pipe_i)
 {
-        ofstream OutFile("вывод.txt", ios::app);
-    if (pipe_i.size_w != 0) {
-        OutFile << "Труба:" << endl;
-        OutFile << "Идентификатор - " << pipe_i.id << endl;
-        OutFile << "Длина(м) - " << pipe_i.size_l << endl;
-        OutFile << "Диаметр(мм) - " << pipe_i.size_w << endl;
-        OutFile << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
+    cout << "Изменить работу трубы?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(-1,2);
+    if (i == 1) {
+        pipe_i.work = !pipe_i.work;
     }
-    else {
-        OutFile << "Нет введенных данных" << endl << endl;
-    };
+}
 
+void EditCS(compressor_station& CS_i) 
+{
+    cout << "Добавить рабочую КС?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(-1, 2);
+    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
+        CS_i.manufactory_w++;
+    }
+    cout << "Убрать рабочую КС?(да - 1, нет - 0):";
+    i = GetCorrectNumber(-1, 2);
+    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
+        CS_i.manufactory_w--;
+    }
+}
+
+void VivodTrub(const pipe& pipe_i)
+{
+        ofstream OutFile;
+        OutFile.open("вывод трубы.txt", ios::out);
+        if (pipe_i.diameter != 0) {
+            OutFile << "Труба:" << endl;
+            OutFile << "Идентификатор - " << pipe_i.id << endl;
+            OutFile << "Длина(м) - " << pipe_i.length << endl;
+            OutFile << "Диаметр(мм) - " << pipe_i.diameter << endl;
+            OutFile << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
+        }
+        else {
+            OutFile << "Нет введенной трубы!" << endl << endl;
+        };
+        OutFile.close();
+}
+
+void VivodCS(const compressor_station& CS_i)
+    {
+    ofstream OutFile;
+    OutFile.open("вывод КС.txt", ios::out);
     if (CS_i.id != 0) {
     OutFile << "Компрессорная станция:" << endl;
     OutFile << "Идентификатор - " << CS_i.id << endl;
@@ -151,56 +167,90 @@ void Keep(pipe& pipe_i, compressor_station& CS_i)
     OutFile << "Эффективность - " << CS_i.efficiency << endl;
     }
     else {
-        OutFile << "Нет введенных данных" << endl << endl;
+        OutFile << "Нет введенной КС!" << endl << endl;
     }
+    OutFile.close();
 };
 
-void Unload(pipe& pipe_i, compressor_station& CS_i)
+pipe VvodTrub()
 {
-    ifstream InFile("ввод.txt");
+    pipe pipe_i;
+    ifstream InFile;
+    InFile.open("ввод трубы.txt", ios::in);
     if (!InFile.is_open())
         cout << "Файл не может быть открыт!\n";
     else {
-        InFile >> pipe_i.id >> pipe_i.size_l >> pipe_i.size_w >> pipe_i.work;
+        InFile >> pipe_i.id >> pipe_i.length >> pipe_i.diameter >> pipe_i.work;
+    }
+    InFile.close();
+    return pipe_i;
+};
+
+compressor_station VvodCS()
+{
+    compressor_station CS_i;
+    ifstream InFile;
+    InFile.open("ввод КС.txt", ios::in);
+    if (!InFile.is_open())
+        cout << "Файл не может быть открыт!\n";
+    else {
         InFile >> CS_i.id >> CS_i.name >> CS_i.manufactory >> CS_i.manufactory_w >> CS_i.efficiency;
     }
+    InFile.close();
+    return CS_i;
 };
 
 int main()
 {    
     pipe P;
     compressor_station CS;
-    P.size_w = 0;
-    CS.id = 0;
-    unsigned int a;                                          //значение из меню
+    bool PSled = 0;
+    bool CSled = 0;
     setlocale(LC_ALL, "Russian");
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            CheckInt(a);
-            switch (a)
+            switch (GetCorrectNumber(0,10))
             {
             case 1:
-                PlusPipe(P);
+                P = PlusPipe();
+                PSled = 1;
                 break;
             case 2:
-                PlusCS(CS);
+                CS = PlusCS();
+                CSled = 1;
                 break;
             case 3:
-                Viewer(P, CS);
-                system("pause");
+                if (PSled) { ViewerPipe(P); system("pause");}
+                else { cout << "ВВедите трубу!"; }
                 break;
             case 4:
-                PlusPipe(P);
+                if (CSled) { ViewerCS(CS); system("pause"); }
+                else { cout << "Введите КС!"; }
                 break;
-            case 5:
-                PlusCS(CS);
+            case 5: 
+                if (PSled) { EditPipe(P); }
+                else { cout << "Введите трубу!"; }
                 break;
             case 6:
-                Keep(P, CS);
+                if (CSled) { EditCS(CS); }
+                else { cout << "Введите КС!"; }
                 break;
             case 7:
-                Unload(P, CS);
+                if (PSled) { VivodTrub(P); }
+                else { cout << "Введите трубу!"; }
+                break;
+            case 8:
+                if (CSled) { VivodCS(CS); }
+                else { cout << "Введите КС!"; }
+                break;
+            case 9:
+                P = VvodTrub();
+                PSled = 1;
+                break;
+            case 10:
+                CS = VvodCS();
+                CSled = 1;
                 break;
             case 0:
                 exit(0);
