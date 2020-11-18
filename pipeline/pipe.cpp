@@ -1,10 +1,16 @@
 #include "pipe.h"
 #include"Utils.h"
 using namespace std;
+
+int pipe::MaxID = 0;
+
+pipe::pipe()
+{
+    id = MaxID++;
+}
+
 istream& operator >> (istream& in, pipe& pipe_i)
 {
-    cout << "Введите идентификатор - ";
-    pipe_i.id = GetCorrectNumber(0, 100000);
     cout << "Введите длину(м) - ";
     pipe_i.length = GetCorrectNumber(0, 200);
     cout << "Введите диаметр(мм) - ";
@@ -17,7 +23,6 @@ istream& operator >> (istream& in, pipe& pipe_i)
 ostream& operator << (ostream& out, pipe& pipe_i)
 {
     cout << "Труба:" << endl;
-    cout << "Идентификатор - " << pipe_i.id << endl;
     cout << "Длина(м) - " << pipe_i.length << endl;
     cout << "Диаметр(мм) - " << pipe_i.diameter << endl;
     cout << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;

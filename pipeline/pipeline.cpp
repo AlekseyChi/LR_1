@@ -24,6 +24,8 @@ void Menu()
         << "8.Сохранить КС" << endl
         << "9.Загрузить трубу" << endl
         << "10.Загрузить КС" << endl
+        << "11.Удалить трубу" << endl
+        << "12.Удалить КС" << endl
         << "0.Выход" << endl;
 };
 
@@ -53,7 +55,6 @@ void EditCS(compressor_station& CS_i)
 void VivodTrub(ofstream& OutFile, const pipe& pipe_i)
 {
     OutFile << "Труба:" << endl;
-    OutFile << "Идентификатор - " << pipe_i.id << endl;
     OutFile << "Длина(м) - " << pipe_i.length << endl;
     OutFile << "Диаметр(мм) - " << pipe_i.diameter << endl;
     OutFile << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
@@ -62,24 +63,47 @@ void VivodTrub(ofstream& OutFile, const pipe& pipe_i)
 void VivodCS(ofstream& OutFile, const compressor_station& CS_i)
 {
     OutFile << "Компрессорная станция:" << endl;
-    OutFile << "Идентификатор - " << CS_i.id << endl;
     OutFile << "Название - " << CS_i.name << endl;
     OutFile << "Количество цехов - " << CS_i.manufactory << endl;
     OutFile << "Количество рабочих цехов - " << CS_i.manufactory_w << endl;
     OutFile << "Эффективность - " << CS_i.efficiency << endl;
 };
 
+void DelPipe(vector <pipe>& groupP) {
+    int x;
+    bool y = 1;
+    cout << "Введите индекс, который надо удалить:";
+    while (y) {
+        x = GetCorrectNumber(1, 100000);
+        groupP.erase(groupP.begin() + x - 1);
+        cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
+        y = GetCorrectNumber(0, 1);
+    }
+}
+
+void DelCS(vector <compressor_station>& CS_i) {
+    int x;
+    bool y = 1;
+    cout << "Введите индекс, который надо удалить:";
+    while (y) {
+        x = GetCorrectNumber(1, 100000);
+        CS_i.erase(CS_i.begin() + x - 1);
+        cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
+        y = GetCorrectNumber(0, 1);
+    }
+}
+
 pipe VvodTrub(ifstream& InFile)
 {
     pipe pipe_i;
-        InFile >> pipe_i.id >> pipe_i.length >> pipe_i.diameter >> pipe_i.work;
+        InFile >> pipe_i.length >> pipe_i.diameter >> pipe_i.work;
     return pipe_i;
 };
 
 compressor_station VvodCS(ifstream& InFile)
 {
     compressor_station CS_i;
-        InFile >> CS_i.id >> CS_i.name >> CS_i.manufactory >> CS_i.manufactory_w >> CS_i.efficiency;
+        InFile >> CS_i.name >> CS_i.manufactory >> CS_i.manufactory_w >> CS_i.efficiency;
     return CS_i;
 };
 
@@ -97,6 +121,19 @@ compressor_station& SelectGroup(vector<compressor_station>& g)
     return g[index - 1];
 }
 
+vector <int> FindCSByName(const vector<compressor_station>& group, string name)
+{
+    vector <int> res;
+    int i = 0;
+    for (auto& s : group)
+    {
+        if (s.name == name)
+            res.push_back(i);
+        i++;
+    }
+    return res;
+}
+
 int main()
 {    
     pipe P;
@@ -109,7 +146,7 @@ int main()
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            switch (GetCorrectNumber(0,10))
+            switch (GetCorrectNumber(0,12))
             {
             case 1:
                 cin >> P;
@@ -148,19 +185,30 @@ int main()
                 else { cout << "Введите КС!"; }
                 break;
             case 7:
-                if (PSled) { 
+            {
+                cout << "Введите название файла для сохранения: ";
+                string Name;
+                cin >> Name;
+                Name += ".txt";
+                if (PSled) {
                     ofstream FOut;
-                    FOut.open("вывод трубы.txt", ios::out);
+                    FOut.open(Name, ios::out);
                     if (FOut.is_open())
-                        {
+                    {
                         for (pipe P : groupP)
                             VivodTrub(FOut, P);
                         FOut.close();
-                        }
                     }
+                }
                 else { cout << "Введите трубу!"; }
                 break;
+            }
             case 8:
+            {
+                cout << "Введите название файла для сохранения: ";
+                string Name;
+                cin >> Name;
+                Name += ".txt";
                 if (CSled) {
                     ofstream fout;
                     fout.open("вывод КС.txt", ios::out);
@@ -173,10 +221,15 @@ int main()
                 }
                 else { cout << "Введите КС!"; }
                 break;
+            }
             case 9:
             {
+                cout << "Введите название файла для загрузки: ";
+                string Name;
+                cin >> Name;
+                Name += ".txt";
                 ifstream InFile;
-                InFile.open("ввод трубы.txt", ios::in);
+                InFile.open(Name, ios::in);
                 if (!InFile.is_open())
                     cout << "Файл не может быть открыт!\n";
                 else {
@@ -191,6 +244,10 @@ int main()
             }
             case 10:
             {
+                cout << "Введите название файла для загрузки: ";
+                string Name;
+                cin >> Name;
+                Name += ".txt";
                 ifstream fin;
                 fin.open("ввод КС.txt", ios::in);
                 if (!fin.is_open())
@@ -205,6 +262,14 @@ int main()
                 CSled = 1;
                 break;
             }
+            case 11:
+            {
+                DelPipe(groupP);
+                break;
+            }
+            case 12:
+                DelCS(groupCS);
+                break;
             case 0:
                 exit(0);
                 break;
