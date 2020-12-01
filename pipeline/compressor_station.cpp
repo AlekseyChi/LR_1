@@ -55,7 +55,7 @@ ostream& operator << (ostream& out, const compressor_station& CS_i)
 
 ofstream& operator << (ofstream& OutFile, const compressor_station& CS_i)
 {
-    OutFile << endl << CS_i.id << CS_i.name << endl << CS_i.manufactory << endl << CS_i.manufactory_w << endl << CS_i.efficiency;
+    OutFile << endl << CS_i.id << endl << CS_i.name << endl << CS_i.manufactory << endl << CS_i.manufactory_w << endl << CS_i.efficiency;
     return OutFile;
 };
 

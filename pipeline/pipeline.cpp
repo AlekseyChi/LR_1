@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include "pipe.h"
 #include "compressor_station.h"
 #include "Utils.h"
@@ -118,6 +118,16 @@ bool CheckByWork(const pipe& P, bool param)
     return P.work == param;
 }
 
+bool CheckByLength(const pipe& P, float param)
+{
+    return P.length == param;
+}
+
+bool CheckByDiam(const pipe& P, int param)
+{
+    return P.length == param;
+}
+
 template<typename T>
 vector <int> FindCSByFilter(const vector<pipe>& group, FilterP<T> f, T param)
 {
@@ -144,7 +154,7 @@ int main()
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            switch (GetCorrectNumber(0,12))
+            switch (GetCorrectNumber(0,15))
             {
             case 1:
                 cin >> P;
@@ -214,7 +224,7 @@ int main()
                 Name += ".txt";
                 if (CSled) {
                     ofstream fout;
-                    fout.open("вывод КС.txt", ios::out);
+                    fout.open(Name, ios::out);
                     if (fout.is_open())
                     {
                         fout << groupCS.size() << endl;
@@ -254,15 +264,15 @@ int main()
                 cin >> Name;
                 Name += ".txt";
                 ifstream fin;
-                fin.open("ввод КС.txt", ios::in);
+                fin.open(Name, ios::in);
                 if (!fin.is_open())
                     cout << "Файл не может быть открыт!\n";
                 else {
                     int i;
                     fin >> i;
-                    groupP.resize(i);
-                    for (pipe& P : groupP)
-                        fin >> P;
+                    groupCS.resize(i);
+                    for (compressor_station& CS : groupCS)
+                        fin >> CS;
                     fin.close();
                 }
                 CSled = 1;
@@ -279,10 +289,12 @@ int main()
             case 13:
             {
                 string name;
-                cout << "Введите название трубы: ";
-                cin >> name;
+                cout << "Введите название КС: ";
+                cin.ignore();
+                getline(cin, name);
                 for (int i : FindCSByFilter(groupCS, CheckByName, name))
                     cout << groupCS[i];
+                system("pause");
                 break;
             }
             case 14:
@@ -292,8 +304,97 @@ int main()
                 cin >> name;
                 for (int i : FindCSByFilter(groupP, CheckByWork, name))
                     cout << groupP[i];
+                system("pause");
                 break;
             }
+            case 15:
+            {
+                bool j;
+                cout << "Чтобы найти трубы по параметру введите 1, по промежутку - 0: ";
+                j = GetCorrectNumber(0, 1);
+                if (j) {
+                    cout << "Выберете параметр поиска" << endl
+                        << "1. Длинна" << endl
+                        << "2. Ширина" << endl
+                        << "3. Работа" << endl;
+                    switch (GetCorrectNumber(1,3))
+                    {
+                        case 1:
+                        {
+                            cout << "Введите длинну, необходимую заменить - ";
+                            float c = GetCorrectNumber(1.0, 100000.0);
+                            cout << "Введите новую длинну - ";
+                            float b = GetCorrectNumber(1.0, 100000.0);
+                            for (int i : FindCSByFilter(groupP, CheckByLength, c))
+                                groupP[i].length = b;
+                        }
+                            break;
+                        case 2:
+                        {
+                            cout << "Введите ширину, необходимую заменить - ";
+                            int c = GetCorrectNumber(1, 100000);
+                            cout << "Введите новую ширину - ";
+                            int b = GetCorrectNumber(1, 100000);
+                            for (int i : FindCSByFilter(groupP, CheckByDiam, c))
+                                groupP[i].diameter = b;
+                        }
+                            break;
+                        case 3:
+                        {
+                            cout << "Введите работу, необходимую заменить - ";
+                            bool c = GetCorrectNumber(0, 1);
+                            cout << "Введите новую работу - ";
+                            bool b = GetCorrectNumber(0, 1);
+                            for (int i : FindCSByFilter(groupP, CheckByWork, c))
+                                groupP[i].work = b;
+                        }
+                            break;
+                    }
+                }
+                else {
+                    int a, b;
+                    int right = groupP.size();
+                    cout << "Введите начальный индекс: ";
+                    a = GetCorrectNumber(0, right);
+                    cout << "Введите конечный индекс: ";
+                    b = GetCorrectNumber(a, right);
+                    cout << "Выберете параметр изменения" << endl
+                        << "1. Длинна" << endl
+                        << "2. Ширина" << endl
+                        << "3. Работа" << endl
+                        << "0. Вернутся обратно" << endl;
+                    switch (GetCorrectNumber(0, 3)) {
+                    case 1:
+                    {
+                        cout << "Введите длинну - ";
+                        float c = GetCorrectNumber(0, 1000000);
+                        for (int i = a; i < b; i++) {
+                            groupP[i].length = c;
+                        }
+                        break;
+                    }
+                    case 2:
+                    {
+                        cout << "Введите диаметр - ";
+                        int c = GetCorrectNumber(0, 1000000);
+                        for (int i = a; i < b; i++) {
+                            groupP[i].diameter = c;
+                        }
+                        break;
+                    }
+                    case 3:
+                    {
+                        cout << "Введите работу - ";
+                        bool c = GetCorrectNumber(0, 1);
+                        for (int i = a; i < b; i++) {
+                            groupP[i].work = c;
+                        }
+                        break;
+                    }
+                    }
+                }
+            }
+                break;
             case 0:
                 exit(0);
                 break;
