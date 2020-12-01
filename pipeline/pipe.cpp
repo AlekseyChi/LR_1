@@ -6,7 +6,16 @@ int pipe::MaxID = 0;
 
 pipe::pipe()
 {
-    id = MaxID++;
+    id = ++MaxID;
+}
+
+void pipe::EditPipe()
+{
+    cout << "Изменить работу трубы?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(-1, 2);
+    if (i == 1) {
+        work = !work;
+    }
 }
 
 istream& operator >> (istream& in, pipe& pipe_i)
@@ -20,11 +29,24 @@ istream& operator >> (istream& in, pipe& pipe_i)
     return in;
 }
 
-ostream& operator << (ostream& out, pipe& pipe_i)
+ostream& operator << (ostream& out, const pipe& pipe_i)
 {
     cout << "Труба:" << endl;
+    cout << "Идентификатор - " << pipe_i.id << endl;
     cout << "Длина(м) - " << pipe_i.length << endl;
     cout << "Диаметр(мм) - " << pipe_i.diameter << endl;
     cout << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
     return out;
 }
+
+ofstream& operator << (ofstream& OutFile, const pipe& pipe_i)
+{
+    OutFile << endl << pipe_i.id << endl << pipe_i.length << endl << pipe_i.diameter << endl << pipe_i.work;
+    return OutFile;
+}
+
+ifstream& operator >> (ifstream& InFile, pipe& pipe_i)
+{
+    InFile >> pipe_i.id >> pipe_i.length >> pipe_i.diameter >> pipe_i.work;
+    return InFile;
+};

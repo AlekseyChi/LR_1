@@ -22,8 +22,8 @@ void Menu()
         << "6.Редактировать КС" << endl
         << "7.Сохранить трубу" << endl
         << "8.Сохранить КС" << endl
-        << "9.Загрузить трубу" << endl
-        << "10.Загрузить КС" << endl
+        << "9.Загрузить из файла трубу" << endl
+        << "10.Загрузить из файла КС" << endl
         << "11.Удалить трубу" << endl
         << "12.Удалить КС" << endl
         << "0.Выход" << endl;
@@ -31,43 +31,13 @@ void Menu()
 
 void EditPipe(pipe& pipe_i)
 {
-    cout << "Изменить работу трубы?(да - 1, нет - 0):";
-    bool i = GetCorrectNumber(-1,2);
-    if (i == 1) {
-        pipe_i.work = !pipe_i.work;
-    }
+    pipe_i.EditPipe();
 }
 
 void EditCS(compressor_station& CS_i) 
 {
-    cout << "Добавить рабочую КС?(да - 1, нет - 0):";
-    bool i = GetCorrectNumber(-1, 2);
-    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
-        CS_i.manufactory_w++;
-    }
-    cout << "Убрать рабочую КС?(да - 1, нет - 0):";
-    i = GetCorrectNumber(-1, 2);
-    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
-        CS_i.manufactory_w--;
-    }
+    CS_i.EditCS();
 }
-
-void VivodTrub(ofstream& OutFile, const pipe& pipe_i)
-{
-    OutFile << "Труба:" << endl;
-    OutFile << "Длина(м) - " << pipe_i.length << endl;
-    OutFile << "Диаметр(мм) - " << pipe_i.diameter << endl;
-    OutFile << (pipe_i.work ? "Работает" : "Не работает") << endl << endl;
-}
-
-void VivodCS(ofstream& OutFile, const compressor_station& CS_i)
-{
-    OutFile << "Компрессорная станция:" << endl;
-    OutFile << "Название - " << CS_i.name << endl;
-    OutFile << "Количество цехов - " << CS_i.manufactory << endl;
-    OutFile << "Количество рабочих цехов - " << CS_i.manufactory_w << endl;
-    OutFile << "Эффективность - " << CS_i.efficiency << endl;
-};
 
 void DelPipe(vector <pipe>& groupP) {
     int x;
@@ -76,8 +46,12 @@ void DelPipe(vector <pipe>& groupP) {
     while (y) {
         x = GetCorrectNumber(1, 100000);
         groupP.erase(groupP.begin() + x - 1);
-        cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
-        y = GetCorrectNumber(0, 1);
+        if (groupP.size() > 0)
+        {
+            cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
+            y = GetCorrectNumber(0, 1);
+        }
+        else y = 0;
     }
 }
 
@@ -88,24 +62,14 @@ void DelCS(vector <compressor_station>& CS_i) {
     while (y) {
         x = GetCorrectNumber(1, 100000);
         CS_i.erase(CS_i.begin() + x - 1);
-        cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
-        y = GetCorrectNumber(0, 1);
+        if (CS_i.size() > 0)
+        {
+            cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
+            y = GetCorrectNumber(0, 1);
+        }
+        else y = 0;
     }
 }
-
-pipe VvodTrub(ifstream& InFile)
-{
-    pipe pipe_i;
-        InFile >> pipe_i.length >> pipe_i.diameter >> pipe_i.work;
-    return pipe_i;
-};
-
-compressor_station VvodCS(ifstream& InFile)
-{
-    compressor_station CS_i;
-        InFile >> CS_i.name >> CS_i.manufactory >> CS_i.manufactory_w >> CS_i.efficiency;
-    return CS_i;
-};
 
 pipe& SelectGroup(vector<pipe>& g)
 {
@@ -159,23 +123,27 @@ int main()
                 CSled = 1;
                 break;
             case 3:
-                if (PSled) 
-                { 
-                    for (auto& P: groupP)
-                        cout << P << endl; 
+            {
+                if (PSled)
+                {
+                    for (auto& P : groupP)
+                        cout << P << endl;
                     system("pause");
                 }
                 else { cout << "ВВедите трубу!"; }
                 break;
+            }
             case 4:
-                if (CSled) 
-                { 
+            {
+                if (CSled)
+                {
                     for (auto& CS : groupCS)
-                        cout << CS << endl; 
-                    system("pause"); 
+                        cout << CS << endl;
+                    system("pause");
                 }
                 else { cout << "Введите КС!"; }
                 break;
+            }
             case 5: 
                 if (PSled) { EditPipe(SelectGroup(groupP)); }
                 else { cout << "Введите трубу!"; }
@@ -195,8 +163,9 @@ int main()
                     FOut.open(Name, ios::out);
                     if (FOut.is_open())
                     {
-                        for (pipe P : groupP)
-                            VivodTrub(FOut, P);
+                        FOut << groupP.size() << endl;
+                        for (pipe& P : groupP)
+                            FOut << P;
                         FOut.close();
                     }
                 }
@@ -214,8 +183,9 @@ int main()
                     fout.open("вывод КС.txt", ios::out);
                     if (fout.is_open())
                     {
-                        for (compressor_station CS : groupCS)
-                            VivodCS(fout, CS);
+                        fout << groupCS.size() << endl;
+                        for (compressor_station& CS : groupCS)
+                            fout << CS;
                         fout.close();
                     }
                 }
@@ -235,8 +205,9 @@ int main()
                 else {
                     int i;
                     InFile >> i;
-                    while (i--)
-                        groupP.push_back(VvodTrub(InFile));
+                    groupP.resize(i);
+                    for (pipe& P : groupP)
+                        InFile >> P;
                     InFile.close();
                 }
                 PSled = 1;
@@ -255,8 +226,9 @@ int main()
                 else {
                     int i;
                     fin >> i;
-                    while (i--)
-                        groupCS.push_back(VvodCS(fin));
+                    groupP.resize(i);
+                    for (pipe& P : groupP)
+                        fin >> P;
                     fin.close();
                 }
                 CSled = 1;

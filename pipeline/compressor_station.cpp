@@ -6,7 +6,21 @@ int compressor_station::MaxID = 0;
 
 compressor_station::compressor_station()
 {
-    id = MaxID++;
+    id = ++MaxID;
+}
+
+void compressor_station::EditCS()
+{
+    cout << "Добавить рабочую КС?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(-1, 2);
+    if (i == 1 && manufactory > manufactory_w) {
+        manufactory_w++;
+    }
+    cout << "Убрать рабочую КС?(да - 1, нет - 0):";
+    i = GetCorrectNumber(-1, 2);
+    if (i == 1 && manufactory > manufactory_w) {
+        manufactory_w--;
+    }
 }
 
 istream& operator >> (istream& in, compressor_station& CS_i)
@@ -28,7 +42,7 @@ istream& operator >> (istream& in, compressor_station& CS_i)
     return in;
 }
 
-ostream& operator << (ostream& out, compressor_station& CS_i)
+ostream& operator << (ostream& out, const compressor_station& CS_i)
 {
     cout << CS_i.id << endl;
     cout << "Компрессорная станция:" << endl;
@@ -38,3 +52,15 @@ ostream& operator << (ostream& out, compressor_station& CS_i)
     cout << "Эффективность - " << CS_i.efficiency << endl;
     return out;
 }
+
+ofstream& operator << (ofstream& OutFile, const compressor_station& CS_i)
+{
+    OutFile << endl << CS_i.id << CS_i.name << endl << CS_i.manufactory << endl << CS_i.manufactory_w << endl << CS_i.efficiency;
+    return OutFile;
+};
+
+ifstream& operator >> (ifstream& InFile, compressor_station& CS_i)
+{
+    InFile >> CS_i.id >> CS_i.name >> CS_i.manufactory >> CS_i.manufactory_w >> CS_i.efficiency;
+    return InFile;
+};
