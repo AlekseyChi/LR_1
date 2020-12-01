@@ -26,6 +26,9 @@ void Menu()
         << "10.Загрузить из файла КС" << endl
         << "11.Удалить трубу" << endl
         << "12.Удалить КС" << endl
+        << "13.Поиск КС по названию" << endl
+        << "14.Поиск трубы по признаку 'времонте'" << endl
+        << "15.Пакетное редактирование труб" << endl
         << "0.Выход" << endl;
 };
 
@@ -84,14 +87,45 @@ compressor_station& SelectGroup(vector<compressor_station>& g)
     unsigned int index = GetCorrectNumber(1u, g.size());
     return g[index - 1];
 }
+//фильтер
+template<typename T>
+using FilterCS = bool(*)(const compressor_station& CS, T param);
 
-vector <int> FindCSByName(const vector<compressor_station>& group, string name)
+bool CheckByName(const compressor_station& CS, string param)
+{
+    return CS.name == param;
+}
+
+template<typename T>
+vector <int> FindCSByFilter(const vector<compressor_station>& group, FilterCS<T> f, T param)
 {
     vector <int> res;
     int i = 0;
     for (auto& s : group)
     {
-        if (s.name == name)
+        if (f(s, param))
+            res.push_back(i);
+        i++;
+    }
+    return res;
+}
+
+template<typename T>
+using FilterP = bool(*)(const pipe& P, T param);
+
+bool CheckByWork(const pipe& P, bool param)
+{
+    return P.work == param;
+}
+
+template<typename T>
+vector <int> FindCSByFilter(const vector<pipe>& group, FilterP<T> f, T param)
+{
+    vector <int> res;
+    int i = 0;
+    for (auto& s : group)
+    {
+        if (f(s, param))
             res.push_back(i);
         i++;
     }
@@ -242,6 +276,24 @@ int main()
             case 12:
                 DelCS(groupCS);
                 break;
+            case 13:
+            {
+                string name;
+                cout << "Введите название трубы: ";
+                cin >> name;
+                for (int i : FindCSByFilter(groupCS, CheckByName, name))
+                    cout << groupCS[i];
+                break;
+            }
+            case 14:
+            {
+                bool name;
+                cout << "Искать рабочие трубы(1), не рабочие(0): ";
+                cin >> name;
+                for (int i : FindCSByFilter(groupP, CheckByWork, name))
+                    cout << groupP[i];
+                break;
+            }
             case 0:
                 exit(0);
                 break;
