@@ -3,11 +3,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <unordered_map>
 #include "pipe.h"
 #include "compressor_station.h"
 #include "Utils.h"
+#include "unordered_map"
 
+struct PCS
+{
+    int idP;
+    int idCS;
+};
 
 using namespace std;
 
@@ -29,171 +34,324 @@ void Menu()
         << "13.Поиск КС по названию" << endl
         << "14.Поиск трубы по признаку 'времонте'" << endl
         << "15.Пакетное редактирование труб" << endl
+        << "16.Создать газотранспортную сеть" << endl
+        << "17.Топологическая сортировка" << endl
+        << "18.Ввод газотранспортной сети" << endl
+        << "19.Вывод газотранспортной сети" << endl
+        << "20.Показать газотранспортную сети" << endl
         << "0.Выход" << endl;
 };
 
-void EditPipe(pipe& pipe_i)
+void PrintPipe(unordered_map<int, pipe>& groupP)
 {
-    pipe_i.EditPipe();
+    if (groupP.size() > 0)
+    {
+        for (auto& P : groupP)
+            cout << P.second << endl;
+        system("pause");
+    }
+    else { cout << "ВВедите трубу!"; }
+}
+
+void PrintCS(unordered_map<int, compressor_station>& groupCS)
+{
+    if (groupCS.size() > 0)
+    {
+        for (auto& CS : groupCS)
+            cout << CS.second << endl;
+        system("pause");
+    }
+    else { cout << "ВВедите трубу!"; }
+}
+
+void EditPipe(pipe& pipe_i)
+{   
+    cout << "Изменить работу трубы?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(0, 1);
+    if (i == 1) {
+        pipe_i.work = !pipe_i.work;
+    }
 }
 
 void EditCS(compressor_station& CS_i) 
 {
-    CS_i.EditCS();
-}
-
-void DelPipe(vector <pipe>& groupP) {
-    int x;
-    bool y = 1;
-    cout << "Введите индекс, который надо удалить:";
-    while (y) {
-        x = GetCorrectNumber(1, 100000);
-        groupP.erase(groupP.begin() + x - 1);
-        if (groupP.size() > 0)
-        {
-            cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
-            y = GetCorrectNumber(0, 1);
-        }
-        else y = 0;
+    cout << "Добавить рабочую КС?(да - 1, нет - 0):";
+    bool i = GetCorrectNumber(-1, 2);
+    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
+        CS_i.manufactory_w++;
+    }
+    cout << "Убрать рабочую КС?(да - 1, нет - 0):";
+    i = GetCorrectNumber(-1, 2);
+    if (i == 1 && CS_i.manufactory > CS_i.manufactory_w) {
+        CS_i.manufactory_w--;
     }
 }
 
-void DelCS(vector <compressor_station>& CS_i) {
-    int x;
-    bool y = 1;
-    cout << "Введите индекс, который надо удалить:";
-    while (y) {
-        x = GetCorrectNumber(1, 100000);
-        CS_i.erase(CS_i.begin() + x - 1);
-        if (CS_i.size() > 0)
-        {
-            cout << endl << "Нужно ли удалять ещё? (1 - да,0 - нет): ";
-            y = GetCorrectNumber(0, 1);
-        }
-        else y = 0;
+void DelPipe(unordered_map<int, pipe>& groupP) {
+    if (groupP.size() > 0)
+    {
+        for (auto& P : groupP)
+            cout << P.second << endl;
+        system("pause");
+    }
+    else { cout << "ВВедите трубу!"; }
+
+    if (groupP.size() > 0) {
+        int number;
+        do {
+            cout << "Введите ID КС, которую нужно удалить: ";
+            number = GetCorrectNumber(1u, groupP.size());
+        } while (groupP.find(number) == groupP.end());
+        groupP.erase(groupP.find(number));
     }
 }
 
-pipe& SelectGroup(vector<pipe>& g)
+void DelCS(unordered_map<int, compressor_station>& CS_i) {
+    if (CS_i.size() > 0)
+    {
+        for (auto& P : CS_i)
+            cout << P.second << endl;
+        system("pause");
+    }
+    else { cout << "ВВедите трубу!"; }
+
+    if (CS_i.size() > 0) {
+        int number;
+        do {
+            cout << "Введите ID КС, которую нужно удалить: ";
+            number = GetCorrectNumber(1u, CS_i.size());
+        } while (CS_i.find(number) == CS_i.end());
+        CS_i.erase(CS_i.find(number));
+    }
+}
+
+pipe& SelectPipe(unordered_map<int, pipe>& g)
 {
     cout << "Введите индекс: ";
     unsigned int index = GetCorrectNumber(1u, g.size());
-    return g[index - 1];
+    return g[index];
 }
 
-compressor_station& SelectGroup(vector<compressor_station>& g)
+compressor_station& SelectCS(unordered_map<int, compressor_station>& g)
 {
     cout << "Введите индекс: ";
     unsigned int index = GetCorrectNumber(1u, g.size());
-    return g[index - 1];
+    return g[index];
 }
-//фильтер
-template<typename T>
-using FilterCS = bool(*)(const compressor_station& CS, T param);
 
-bool CheckByName(const compressor_station& CS, string param)
+template<typename PC,typename T>
+using FilterCS = bool(*)(PC& CS, T param);
+
+bool CheckByName(compressor_station& CS, string param)
 {
     return CS.name == param;
 }
 
-template<typename T>
-vector <int> FindCSByFilter(const vector<compressor_station>& group, FilterCS<T> f, T param)
+template<typename PC,typename T>
+vector <int> FindByFilter(unordered_map<int, PC>& group, FilterCS<PC, T> f, T param)
 {
     vector <int> res;
-    int i = 0;
-    for (auto& s : group)
+    res.reserve(group.size());
+    for (auto& pipe : group)
     {
-        if (f(s, param))
-            res.push_back(i);
-        i++;
+        if (f(pipe.second, param))
+            res.push_back(pipe.first);
     }
     return res;
 }
 
-template<typename T>
-using FilterP = bool(*)(const pipe& P, T param);
-
-bool CheckByWork(const pipe& P, bool param)
+bool CheckByWork(pipe& P, bool param)
 {
     return P.work == param;
 }
 
-bool CheckByLength(const pipe& P, float param)
+bool CheckByLength(pipe& P, float param)
 {
     return P.length == param;
 }
 
-bool CheckByDiam(const pipe& P, int param)
+bool CheckByDiam(pipe& P, int param)
 {
-    return P.length == param;
+    return P.diameter == param;
 }
 
-template<typename T>
-vector <int> FindCSByFilter(const vector<pipe>& group, FilterP<T> f, T param)
+void DisplayGraph(unordered_map<int, vector<PCS>>& Graph, unordered_map<int, pipe>& groupP, unordered_map<int, compressor_station>& groupCS)
 {
-    vector <int> res;
-    int i = 0;
-    for (auto& s : group)
+    for (auto& el : Graph)
     {
-        if (f(s, param))
-            res.push_back(i);
-        i++;
+        cout << "КС с ID " << el.first << " соединен с: ";
+        for (auto cs = el.second.begin(); cs != el.second.end(); cs++)
+        {
+            cout << cs->idCS << " кс длиной " << groupP[cs->idP].length;
+            if (cs + 1 != el.second.end()) cout << ", ";
+        }
+        cout << endl;
     }
-    return res;
+}
+
+void dfs(int v, unordered_map<int, vector<PCS>>& g, unordered_map<int, bool>& count, vector<int>& ans) {
+    count[v] = true;
+    vector<PCS> arr;
+    if (g.find(v) != g.end()) {
+
+        arr = g[v];
+        for (auto& el : arr) {
+            int to = el.idCS;
+
+            if (!count[to])
+                dfs(to, g, count, ans);
+        }
+    }
+    ans.push_back(v);
+}
+
+void topologicalSort(unordered_map<int, vector<PCS>>& g, unordered_map<int, bool>& count, vector<int>& ans) {
+    for (auto& el : g)
+    {
+        count[el.first] = false;
+    }
+    ans.clear();
+    for (auto& el : count)
+        if (!el.second)
+            dfs(el.first, g, count, ans);
+    reverse(ans.begin(), ans.end());
+}
+
+bool dfs2(int v, unordered_map<int, vector<PCS>>& g, unordered_map<int, int>& cl, int& cycle_st) {
+    cl[v] = 1;
+    if (g.find(v) == g.end())
+    {
+        return false;
+    }
+    for (size_t i = 0; i < g[v].size(); ++i) {
+        int to;
+
+        to = g[v][i].idCS;
+        if (cl[to] == 0) {
+            if (dfs2(to, g, cl, cycle_st))  return true;
+        }
+        else if (cl[to] == 1) {
+            cycle_st = to;
+            return true;
+        }
+    }
+    cl[v] = 2;
+    return false;
+}
+
+bool searchForCycle(unordered_map<int, vector<PCS>>& graph)
+{
+    unordered_map<int, int> p;
+    int cycle_st, cycle_end;
+    for (auto& el : graph)
+    {
+        p[el.first] = 0;
+    }
+    cycle_st = -1;
+    for (auto& el : p)
+        if (!el.second)
+            if (dfs2(el.first, graph, p, cycle_st)) break;
+    if (cycle_st == -1) return false;
+    else return true;
+}
+
+void InputGraphFromFile(unordered_map<int, vector<PCS>>& graph, string str)
+{
+
+    ifstream fin(string(str) + ".txt");
+    if (!fin.is_open())
+        cout << "Файл не может быть открыт!\n";
+    else
+    {
+        int buff;
+        while (fin >> buff)
+        {
+            int CSid1;
+            fin >> CSid1;
+            for (int i = 0; i < buff; i++)
+            {
+                int CSid2;
+                fin >> CSid2;
+                int Pipeid;
+                fin >> Pipeid;
+                PCS pair1;
+                pair1.idCS = CSid2;
+                pair1.idP = Pipeid;
+                graph[CSid1].push_back(pair1);
+            }
+        }
+        cout << "Ввели из файла данные";
+        fin.close();
+    }
+
+}
+
+void OutputGraphToFile(unordered_map<int, vector<PCS>> graph, string str)
+{
+
+    ofstream fout;
+    fout.open(string(str) + ".txt");
+    if (!fout.is_open())
+        cout << "Файл не может быть открыт!\n";
+    else
+    {
+
+        for (auto& el : graph)
+        {
+            fout << el.second.size() << " ";
+            fout << el.first << " ";
+            for (auto cs = el.second.begin(); cs != el.second.end(); cs++)
+            {
+                fout << cs->idCS << " " << cs->idP << " ";
+            }
+            fout << endl;
+        }
+        cout << "Вывели в файл данные";
+        fout.close();
+    }
 }
 
 int main()
 {    
-    pipe P;
-    compressor_station CS;
-    vector <compressor_station> groupCS;
-    vector <pipe> groupP;
-    bool PSled = 0;
-    bool CSled = 0;
+    unordered_map<int, pipe> groupP;
+    unordered_map<int, compressor_station> groupCS;
+    unordered_map<int, vector<PCS>> Graph;
     setlocale(LC_ALL, "Russian");
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            switch (GetCorrectNumber(0,15))
+            switch (GetCorrectNumber(0,20))
             {
             case 1:
+            {
+                pipe P;
                 cin >> P;
-                groupP.push_back(P);
-                PSled = 1;
+                groupP.insert(pair<int, pipe>(P.GetId(), P));
                 break;
+            }
             case 2:
+            {
+                compressor_station CS;
                 cin >> CS;
-                groupCS.push_back(CS);
-                CSled = 1;
+                groupCS.insert(pair<int, compressor_station>(CS.GetId(), CS));
                 break;
+            }
             case 3:
             {
-                if (PSled)
-                {
-                    for (auto& P : groupP)
-                        cout << P << endl;
-                    system("pause");
-                }
-                else { cout << "ВВедите трубу!"; }
+                PrintPipe(groupP);
                 break;
             }
             case 4:
             {
-                if (CSled)
-                {
-                    for (auto& CS : groupCS)
-                        cout << CS << endl;
-                    system("pause");
-                }
-                else { cout << "Введите КС!"; }
+                PrintCS(groupCS);
                 break;
             }
             case 5: 
-                if (PSled) { EditPipe(SelectGroup(groupP)); }
+                if (groupP.size()>0) { EditPipe(SelectPipe(groupP)); }
                 else { cout << "Введите трубу!"; }
                 break;
             case 6:
-                if (CSled) { EditCS(SelectGroup(groupCS)); }
+                if (groupCS.size()>0) { EditCS(SelectCS(groupCS)); }
                 else { cout << "Введите КС!"; }
                 break;
             case 7:
@@ -202,14 +360,14 @@ int main()
                 string Name;
                 cin >> Name;
                 Name += ".txt";
-                if (PSled) {
+                if (groupP.size()>0) {
                     ofstream FOut;
                     FOut.open(Name, ios::out);
                     if (FOut.is_open())
                     {
                         FOut << groupP.size() << endl;
-                        for (pipe& P : groupP)
-                            FOut << P;
+                        for (auto& P : groupP)
+                            FOut << P.second;
                         FOut.close();
                     }
                 }
@@ -222,14 +380,14 @@ int main()
                 string Name;
                 cin >> Name;
                 Name += ".txt";
-                if (CSled) {
+                if (groupCS.size()>0) {
                     ofstream fout;
                     fout.open(Name, ios::out);
                     if (fout.is_open())
                     {
                         fout << groupCS.size() << endl;
-                        for (compressor_station& CS : groupCS)
-                            fout << CS;
+                        for (auto& CS : groupCS)
+                            fout << CS.second;
                         fout.close();
                     }
                 }
@@ -247,14 +405,17 @@ int main()
                 if (!InFile.is_open())
                     cout << "Файл не может быть открыт!\n";
                 else {
+                    groupP.erase(groupP.begin(), groupP.end());
                     int i;
                     InFile >> i;
-                    groupP.resize(i);
-                    for (pipe& P : groupP)
+                    for (int j = 1; j <= i; ++j)
+                    {
+                        pipe P;
                         InFile >> P;
+                        groupP.insert(pair<int, pipe>(P.GetId(), P));
+                    }
                     InFile.close();
                 }
-                PSled = 1;
                 break;
             }
             case 10:
@@ -270,12 +431,15 @@ int main()
                 else {
                     int i;
                     fin >> i;
-                    groupCS.resize(i);
-                    for (compressor_station& CS : groupCS)
-                        fin >> CS;
+                    groupCS.erase(groupCS.begin(), groupCS.end());
+                    for (int j = 1; j <= i; ++j)
+                    {
+                        compressor_station cs;
+                        fin >> cs;
+                        groupCS.insert(pair<int, compressor_station>(cs.GetId(), cs));
+                    }
                     fin.close();
                 }
-                CSled = 1;
                 break;
             }
             case 11:
@@ -292,7 +456,7 @@ int main()
                 cout << "Введите название КС: ";
                 cin.ignore();
                 getline(cin, name);
-                for (int i : FindCSByFilter(groupCS, CheckByName, name))
+                for (int i : FindByFilter(groupCS, CheckByName, name))
                     cout << groupCS[i];
                 system("pause");
                 break;
@@ -302,7 +466,7 @@ int main()
                 bool name;
                 cout << "Искать рабочие трубы(1), не рабочие(0): ";
                 cin >> name;
-                for (int i : FindCSByFilter(groupP, CheckByWork, name))
+                for (int i : FindByFilter(groupP, CheckByWork, name))
                     cout << groupP[i];
                 system("pause");
                 break;
@@ -314,38 +478,27 @@ int main()
                 j = GetCorrectNumber(0, 1);
                 if (j) {
                     cout << "Выберете параметр поиска" << endl
-                        << "1. Длинна" << endl
-                        << "2. Ширина" << endl
-                        << "3. Работа" << endl;
+                        << "1. Длина" << endl
+                        << "2. Работа" << endl;
                     switch (GetCorrectNumber(1,3))
                     {
                         case 1:
                         {
-                            cout << "Введите длинну, необходимую заменить - ";
+                            cout << "Введите длину, необходимую заменить - ";
                             float c = GetCorrectNumber(1.0, 100000.0);
-                            cout << "Введите новую длинну - ";
+                            cout << "Введите новую длину - ";
                             float b = GetCorrectNumber(1.0, 100000.0);
-                            for (int i : FindCSByFilter(groupP, CheckByLength, c))
+                            for (int i : FindByFilter(groupP, CheckByLength, c))
                                 groupP[i].length = b;
                         }
                             break;
                         case 2:
                         {
-                            cout << "Введите ширину, необходимую заменить - ";
-                            int c = GetCorrectNumber(1, 100000);
-                            cout << "Введите новую ширину - ";
-                            int b = GetCorrectNumber(1, 100000);
-                            for (int i : FindCSByFilter(groupP, CheckByDiam, c))
-                                groupP[i].diameter = b;
-                        }
-                            break;
-                        case 3:
-                        {
                             cout << "Введите работу, необходимую заменить - ";
                             bool c = GetCorrectNumber(0, 1);
                             cout << "Введите новую работу - ";
                             bool b = GetCorrectNumber(0, 1);
-                            for (int i : FindCSByFilter(groupP, CheckByWork, c))
+                            for (int i : FindByFilter(groupP, CheckByWork, c))
                                 groupP[i].work = b;
                         }
                             break;
@@ -395,6 +548,83 @@ int main()
                 }
             }
                 break;
+            case 16:
+            {
+                int i;
+                int j = 0;
+                PCS pcs;
+                PrintPipe(groupP);
+                PrintCS(groupCS);
+                if (groupCS.size() > 1 && groupP.size()>0)
+                {
+                    cout << "Введите колество труб: ";
+                    i = GetCorrectNumber(1u, groupP.size());
+                    while (i > 0) {
+                        cout << "Введите id КС, от которой идёт труба: ";
+                        int idCS1 = GetCorrectNumber(1u, groupCS.size());
+                        cout << "Введите id КС, в которую идёт труба: ";
+                        pcs.idCS = GetCorrectNumber(1u, groupCS.size());
+                        cout << "Введите id трубы: ";
+                        pcs.idP = GetCorrectNumber(1u, groupP.size());
+
+                        Graph[idCS1].push_back(pcs);
+                        i--;
+                    }
+                    DisplayGraph(Graph,groupP,groupCS);
+                }
+                else
+                {
+                    cout << "Невозможно выполнить операцию";
+                };
+                system("pause");
+                break;
+            }
+            case 17:
+            {
+                if (!searchForCycle(Graph))
+                {
+                    unordered_map<int, bool> count;
+                    vector<int> ans;
+                    topologicalSort(Graph, count, ans);
+                    for (auto index = ans.begin(); index != ans.end(); index++)
+                    {
+                        cout << *index;
+                        if (index + 1 != ans.end()) cout << " -> ";
+                    }
+                    system("pause");
+                }
+                else
+                {
+                    cout << "Граф цикличный!" << endl;
+                }
+            system("pause");
+                break;
+            }
+            case 18:
+            {
+                string str;
+                cin >> str;
+                InputGraphFromFile(Graph, str);
+
+                system("pause");
+                break;
+                break;
+            }
+            case 19:
+            {
+                string str;
+                cin >> str;
+                OutputGraphToFile(Graph, str);
+
+                system("pause");
+                break;
+            }
+            case 20:
+            {
+                DisplayGraph(Graph, groupP, groupCS);
+                system("pause");
+                break;
+            }
             case 0:
                 exit(0);
                 break;

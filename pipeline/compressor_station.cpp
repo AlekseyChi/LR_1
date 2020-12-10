@@ -4,23 +4,14 @@ using namespace std;
 
 int compressor_station::MaxID = 0;
 
+int compressor_station::GetId()
+{
+    return id;
+}
+
 compressor_station::compressor_station()
 {
     id = ++MaxID;
-}
-
-void compressor_station::EditCS()
-{
-    cout << "Добавить рабочую КС?(да - 1, нет - 0):";
-    bool i = GetCorrectNumber(-1, 2);
-    if (i == 1 && manufactory > manufactory_w) {
-        manufactory_w++;
-    }
-    cout << "Убрать рабочую КС?(да - 1, нет - 0):";
-    i = GetCorrectNumber(-1, 2);
-    if (i == 1 && manufactory > manufactory_w) {
-        manufactory_w--;
-    }
 }
 
 istream& operator >> (istream& in, compressor_station& CS_i)

@@ -4,15 +4,13 @@
 class pipe
 {
     int id;
-public:
     static int MaxID;
-    float length;                                   //длина
-    int diameter;                            //диаметр
-    bool work;                                      //работает или нет
-
+public:        
+    int diameter;
+    float length;
+    bool work;
+    int GetId();
     pipe();
-
-    void EditPipe();
 
     friend std::ostream& operator << (std::ostream& out, const pipe& pipe_i);
     friend std::istream& operator >> (std::istream& in, pipe& pipe_i);

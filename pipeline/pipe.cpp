@@ -4,18 +4,14 @@ using namespace std;
 
 int pipe::MaxID = 0;
 
+int pipe::GetId()
+{
+    return id;
+}
+
 pipe::pipe()
 {
     id = ++MaxID;
-}
-
-void pipe::EditPipe()
-{
-    cout << "Изменить работу трубы?(да - 1, нет - 0):";
-    bool i = GetCorrectNumber(-1, 2);
-    if (i == 1) {
-        work = !work;
-    }
 }
 
 istream& operator >> (istream& in, pipe& pipe_i)
@@ -31,6 +27,7 @@ istream& operator >> (istream& in, pipe& pipe_i)
 
 ostream& operator << (ostream& out, const pipe& pipe_i)
 {
+    cout << pipe_i.id << endl;
     cout << "Труба:" << endl;
     cout << "Идентификатор - " << pipe_i.id << endl;
     cout << "Длина(м) - " << pipe_i.length << endl;
