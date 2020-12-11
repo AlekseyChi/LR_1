@@ -87,7 +87,9 @@ void EditCS(compressor_station& CS_i)
     }
 }
 
-void DelPipe(unordered_map<int, pipe>& groupP) {
+void DelPipe(unordered_map<int, pipe>& groupP) 
+{
+    size_t a = 1;
     if (groupP.size() > 0)
     {
         for (auto& P : groupP)
@@ -100,13 +102,15 @@ void DelPipe(unordered_map<int, pipe>& groupP) {
         int number;
         do {
             cout << "Введите ID КС, которую нужно удалить: ";
-            number = GetCorrectNumber(1u, groupP.size());
+            number = GetCorrectNumber(a, groupP.size());
         } while (groupP.find(number) == groupP.end());
         groupP.erase(groupP.find(number));
     }
 }
 
-void DelCS(unordered_map<int, compressor_station>& CS_i) {
+void DelCS(unordered_map<int, compressor_station>& CS_i) 
+{
+    size_t a = 1;
     if (CS_i.size() > 0)
     {
         for (auto& P : CS_i)
@@ -119,7 +123,7 @@ void DelCS(unordered_map<int, compressor_station>& CS_i) {
         int number;
         do {
             cout << "Введите ID КС, которую нужно удалить: ";
-            number = GetCorrectNumber(1u, CS_i.size());
+            number = GetCorrectNumber(a, CS_i.size());
         } while (CS_i.find(number) == CS_i.end());
         CS_i.erase(CS_i.find(number));
     }
@@ -127,15 +131,17 @@ void DelCS(unordered_map<int, compressor_station>& CS_i) {
 
 pipe& SelectPipe(unordered_map<int, pipe>& g)
 {
+    size_t a = 1;
     cout << "Введите индекс: ";
-    unsigned int index = GetCorrectNumber(1u, g.size());
+    unsigned int index = GetCorrectNumber(a, g.size());
     return g[index];
 }
 
 compressor_station& SelectCS(unordered_map<int, compressor_station>& g)
 {
+    size_t a = 1;
     cout << "Введите индекс: ";
-    unsigned int index = GetCorrectNumber(1u, g.size());
+    unsigned int index = GetCorrectNumber(a, g.size());
     return g[index];
 }
 
@@ -552,20 +558,21 @@ int main()
             {
                 int i;
                 int j = 0;
+                size_t a = 1;
                 PCS pcs;
                 PrintPipe(groupP);
                 PrintCS(groupCS);
                 if (groupCS.size() > 1 && groupP.size()>0)
                 {
                     cout << "Введите колество труб: ";
-                    i = GetCorrectNumber(1u, groupP.size());
+                    i = GetCorrectNumber(a, groupP.size());
                     while (i > 0) {
                         cout << "Введите id КС, от которой идёт труба: ";
-                        int idCS1 = GetCorrectNumber(1u, groupCS.size());
+                        int idCS1 = GetCorrectNumber(a, groupCS.size());
                         cout << "Введите id КС, в которую идёт труба: ";
-                        pcs.idCS = GetCorrectNumber(1u, groupCS.size());
+                        pcs.idCS = GetCorrectNumber(a, groupCS.size());
                         cout << "Введите id трубы: ";
-                        pcs.idP = GetCorrectNumber(1u, groupP.size());
+                        pcs.idP = GetCorrectNumber(a, groupP.size());
 
                         Graph[idCS1].push_back(pcs);
                         i--;
