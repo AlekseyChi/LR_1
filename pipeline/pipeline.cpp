@@ -36,9 +36,11 @@ void Menu()
         << "15.Пакетное редактирование труб" << endl
         << "16.Создать газотранспортную сеть" << endl
         << "17.Топологическая сортировка" << endl
-        << "18.Ввод газотранспортной сети" << endl
-        << "19.Вывод газотранспортной сети" << endl
+        << "18.Загрузить газотранспортную сеть" << endl
+        << "19.Сохранить газотранспортную сеть" << endl
         << "20.Показать газотранспортную сети" << endl
+        << "21.Удалить газотранспортную сети" << endl
+        << "22.Удалить КС из газотранспортной сети" << endl
         << "0.Выход" << endl;
 };
 
@@ -317,16 +319,42 @@ void OutputGraphToFile(unordered_map<int, vector<PCS>> graph, string str)
     }
 }
 
+void DeleteCSGraph(unordered_map<int, vector<PCS>>& graph, unordered_map<int, compressor_station>& groupCS)
+{
+    size_t a = 1;
+    int idCS1 = -1;
+    while (groupCS.find(idCS1) == groupCS.end())
+    {
+        cout << "Введите Id Кс необходимую отключить: ";
+        idCS1 = GetCorrectNumber(a, groupCS.size());
+    }
+    if (graph.find(idCS1) != graph.end())
+    {
+        graph.erase(idCS1);
+    }
+    for (auto el = graph.begin(); el != graph.end(); el++)
+    {
+        for (auto it = 0; it < el->second.size(); it++)
+        {
+            if (el->second[it].idCS == idCS1) {
+                el->second.erase(el->second.begin() + it);
+            }
+        }
+    }
+    cout << "Удален!" << endl;
+}
+
 int main()
 {    
     unordered_map<int, pipe> groupP;
     unordered_map<int, compressor_station> groupCS;
     unordered_map<int, vector<PCS>> Graph;
+    size_t a = 1;
     setlocale(LC_ALL, "Russian");
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            switch (GetCorrectNumber(0,20))
+            switch (GetCorrectNumber(0,22))
             {
             case 1:
             {
@@ -558,7 +586,6 @@ int main()
             {
                 int i;
                 int j = 0;
-                size_t a = 1;
                 PCS pcs;
                 PrintPipe(groupP);
                 PrintCS(groupCS);
@@ -610,6 +637,7 @@ int main()
             case 18:
             {
                 string str;
+                cout << "Введите название файла: ";
                 cin >> str;
                 InputGraphFromFile(Graph, str);
 
@@ -620,6 +648,7 @@ int main()
             case 19:
             {
                 string str;
+                cout << "Введите название файла: ";
                 cin >> str;
                 OutputGraphToFile(Graph, str);
 
@@ -632,12 +661,23 @@ int main()
                 system("pause");
                 break;
             }
+            case 21:
+            {
+                Graph.clear();
+                break;
+            }
+            case 22:
+            {
+                PrintCS(groupCS);
+                DeleteCSGraph(Graph, groupCS);
+                system("pause");
+                break;
+            }
             case 0:
                 exit(0);
                 break;
             default:
                 cout << "Введите верное число!" << endl;
-                system("pause");
                 break;
             }
     }
