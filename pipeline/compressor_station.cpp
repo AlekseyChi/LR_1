@@ -14,6 +14,11 @@ compressor_station::compressor_station()
     id = ++MaxID;
 }
 
+unsigned int compressor_station::GetMaxID()
+{
+    return MaxID;
+}
+
 istream& operator >> (istream& in, compressor_station& CS_i)
 {
     cout << "¬ведите название - ";

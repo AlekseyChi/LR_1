@@ -13,6 +13,7 @@ public:
     int manufactory_w;
     int GetId();
     compressor_station();
+    static unsigned int GetMaxID();
 
     friend std::ostream& operator << (std::ostream& out, const compressor_station& CS_i);
     friend std::istream& operator >> (std::istream& in, compressor_station& CS_i);

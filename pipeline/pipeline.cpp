@@ -32,6 +32,7 @@ void Menu()
         << "20.Показать газотранспортную сети" << endl
         << "21.Удалить газотранспортную сети" << endl
         << "22.Удалить КС из газотранспортной сети" << endl
+        << "23.Кратчайший путь" << endl
         << "0.Выход" << endl;
 };
 
@@ -184,7 +185,7 @@ int main()
     while (true) {
         Menu();
         cout << "Выберите действие - ";
-            switch (GetCorrectNumber(0,22))
+            switch (GetCorrectNumber(0,23))
             {
             case 1:
             {
@@ -415,6 +416,12 @@ int main()
             {
                 PrintCS(groupCS);
                 DeleteCSGraph(Graph, groupCS);
+                system("pause");
+                break;
+            }
+            case 23:
+            {
+                ShortPath(Graph,groupP);
                 system("pause");
                 break;
             }

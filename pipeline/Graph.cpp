@@ -56,11 +56,11 @@ void topologicalSort(unordered_map<int, vector<PCS>>& g, unordered_map<int, bool
 }
 
 bool dfs2(int v, unordered_map<int, vector<PCS>>& g, unordered_map<int, int>& cl, int& cycle_st) {
-    cl[v] = 1;
     if (g.find(v) == g.end())
     {
         return false;
     }
+    cl[v] = 1;
     for (size_t i = 0; i < g[v].size(); ++i) {
         int to;
 
@@ -87,7 +87,6 @@ bool searchForCycle(unordered_map<int, vector<PCS>>& graph)
     }
     cycle_st = -1;
     for (auto& el : p)
-        if (!el.second)
             if (dfs2(el.first, graph, p, cycle_st)) break;
     if (cycle_st == -1) return false;
     else return true;
@@ -198,4 +197,89 @@ void DeleteCSGraph(unordered_map<int, vector<PCS>>& graph, unordered_map<int, co
         }
     }
     cout << "Удален!" << endl;
+}
+
+unordered_map<int, bool> CountVertex(unordered_map<int, vector<PCS>>& graph)
+{
+    unordered_map<int, bool> count;
+    for (auto& iter : graph)
+    {
+        count[iter.first] = false;
+        for (auto& v : iter.second)
+        {
+            count[v.idCS] = false;
+        }
+    }
+    return count;
+}
+//Алгоритм Дейкстры
+void ShortPath(unordered_map<int, vector<PCS>>& graph, unordered_map<int, pipe>& pipe_group)
+{
+    cout << "Введите id КС - начало пути: ";
+    int id_from = GetCorrectNumber(1u, compressor_station::GetMaxID());
+    cout << "Введите id КС - конец пути: ";
+    int id_to = GetCorrectNumber(1u, compressor_station::GetMaxID());
+    if (graph.find(id_from) != graph.end())
+    {
+        unordered_map <int, int> distance;
+        unordered_map <int, bool> passed;
+        unordered_map<int, bool> count = CountVertex(graph);
+        unordered_map<int, int>p;
+
+        for (auto i = graph.begin(); i != graph.end(); i++)
+        {
+            int i1 = i->first;
+            distance[i1] = INT_MAX;
+            passed[i1] = false;
+            for (auto j : i->second)
+            {
+                distance[j.idCS] = INT_MAX;
+                passed[j.idCS] = false;
+            }
+        }
+        distance[id_from] = 0;
+        int index = 0;
+        for (auto j = count.begin(); j != count.end(); j++)
+        {
+            int min = INT_MAX;
+            for (auto i = count.begin(); i != count.end(); i++)
+            {
+                int i1 = i->first;
+                if (!passed[i1] && distance[i1] <= min)
+                {
+                    min = distance[i1];
+                    index = i1;
+                }
+            }
+            passed[index] = true;
+            for (auto i = graph[index].begin(); i != graph[index].end(); i++)
+            {
+                int i1 = i->idCS;
+                if (!passed[i1] && distance[index] != INT_MAX && distance[index] + pipe_group[i1].length < distance[i1])
+                {
+                    distance[i1] = distance[index] + pipe_group[i1].length;
+                    p[i1] = index;
+                }
+
+            }
+        }
+        cout << "Наикратчайший путь:" << endl;
+        if (distance[id_to] != INT_MAX)
+        {
+            cout << id_from << " -> " << id_to << " = " << distance[id_to] << endl;
+            vector <int> path;
+            for (int vertex = id_to; vertex != id_from; vertex = p[vertex])
+                path.push_back(vertex);
+            path.push_back(id_from);
+            reverse(path.begin(), path.end());
+            cout << "Путь: ";
+            for (auto i = path.begin(); i != path.end(); i++)
+            {
+                if (i + 1 != path.end()) cout << *i << " -> ";
+                else cout << *i;
+            }
+        }
+        else cout << id_from << " -> " << id_to << " - пути нет";
+    }
+    else cout << "Невозможно!" << endl;
 }

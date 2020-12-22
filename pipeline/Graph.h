@@ -30,3 +30,7 @@ void InputGraphFromFile(unordered_map<int, vector<PCS>>& graph, unordered_map<in
 void OutputGraphToFile(const unordered_map<int, vector<PCS>>& graph, const unordered_map<int, pipe>& groupP, const unordered_map<int, compressor_station>& groupCS, string str);
 
 void DeleteCSGraph(unordered_map<int, vector<PCS>>& graph, unordered_map<int, compressor_station>& groupCS);
+
+unordered_map<int, bool> CountVertex(unordered_map<int, vector<PCS>>& graph);
+
+void ShortPath(unordered_map<int, vector<PCS>>& graph, unordered_map<int, pipe>& pipe_group);
