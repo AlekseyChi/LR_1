@@ -93,15 +93,33 @@ bool searchForCycle(unordered_map<int, vector<PCS>>& graph)
     else return true;
 }
 
-void InputGraphFromFile(unordered_map<int, vector<PCS>>& graph, string str)
+void InputGraphFromFile(unordered_map<int, vector<PCS>>& graph, unordered_map<int, pipe>& groupP, unordered_map<int, compressor_station>& groupCS, string str)
 {
 
-    ifstream fin(string(str) + ".txt");
+    ifstream fin;
+    fin.open(str + ".txt", ios::in);
     if (!fin.is_open())
         cout << "Файл не может быть открыт!\n";
     else
     {
         int buff;
+        groupP.erase(groupP.begin(), groupP.end());
+        fin >> buff;
+        for (int j = 1; j <= buff; ++j)
+        {
+            pipe P;
+            fin >> P;
+            groupP.insert(pair<int, pipe>(P.GetId(), P));
+        }
+
+        fin >> buff;
+        groupCS.erase(groupCS.begin(), groupCS.end());
+        for (int j = 1; j <= buff; ++j)
+        {
+            compressor_station cs;
+            fin >> cs;
+            groupCS.insert(pair<int, compressor_station>(cs.GetId(), cs));
+        }
         while (fin >> buff)
         {
             int CSid1;
@@ -118,22 +136,29 @@ void InputGraphFromFile(unordered_map<int, vector<PCS>>& graph, string str)
                 graph[CSid1].push_back(pair1);
             }
         }
-        cout << "Ввели из файла данные";
+
+        cout << "Ввели из файла данные" << endl;
         fin.close();
     }
 
 }
 
-void OutputGraphToFile(unordered_map<int, vector<PCS>> graph, string str)
+void OutputGraphToFile(const unordered_map<int, vector<PCS>>& graph, const unordered_map<int, pipe>& groupP, const unordered_map<int, compressor_station>& groupCS, string str)
 {
-
     ofstream fout;
-    fout.open(string(str) + ".txt");
+    fout.open(str + ".txt");
     if (!fout.is_open())
         cout << "Файл не может быть открыт!\n";
     else
     {
-
+        fout << groupP.size() << endl;
+        for (auto& P : groupP)
+            fout << P.second;
+        fout << endl;
+        fout << groupCS.size() << endl;
+        for (auto& CS : groupCS)
+            fout << CS.second;
+        fout << endl;
         for (auto& el : graph)
         {
             fout << el.second.size() << " ";
@@ -144,7 +169,8 @@ void OutputGraphToFile(unordered_map<int, vector<PCS>> graph, string str)
             }
             fout << endl;
         }
-        cout << "Вывели в файл данные";
+
+        cout << "Вывели в файл данные" << endl;
         fout.close();
     }
 }

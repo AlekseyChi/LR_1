@@ -20,14 +20,10 @@ void Menu()
         << "4.Просмотр КС" << endl
         << "5.Редактировать трубу" << endl
         << "6.Редактировать КС" << endl
-        << "7.Сохранить трубу" << endl
-        << "8.Сохранить КС" << endl
-        << "9.Загрузить из файла трубу" << endl
-        << "10.Загрузить из файла КС" << endl
         << "11.Удалить трубу" << endl
         << "12.Удалить КС" << endl
         << "13.Поиск КС по названию" << endl
-        << "14.Поиск трубы по признаку 'времонте'" << endl
+        << "14.Поиск трубы по признаку 'в ремонте'" << endl
         << "15.Пакетное редактирование труб" << endl
         << "16.Создать газотранспортную сеть" << endl
         << "17.Топологическая сортировка" << endl
@@ -215,99 +211,15 @@ int main()
                 break;
             }
             case 5: 
-                if (groupP.size()>0) { EditPipe(SelectPipe(groupP)); }
+            {
+                if (groupP.size() > 0) { EditPipe(SelectPipe(groupP)); }
                 else { cout << "Введите трубу!"; }
                 break;
+            }
             case 6:
-                if (groupCS.size()>0) { EditCS(SelectCS(groupCS)); }
+            {
+                if (groupCS.size() > 0) { EditCS(SelectCS(groupCS)); }
                 else { cout << "Введите КС!"; }
-                break;
-            case 7:
-            {
-                cout << "Введите название файла для сохранения: ";
-                string Name;
-                cin >> Name;
-                Name += ".txt";
-                if (groupP.size()>0) {
-                    ofstream FOut;
-                    FOut.open(Name, ios::out);
-                    if (FOut.is_open())
-                    {
-                        FOut << groupP.size() << endl;
-                        for (auto& P : groupP)
-                            FOut << P.second;
-                        FOut.close();
-                    }
-                }
-                else { cout << "Введите трубу!"; }
-                break;
-            }
-            case 8:
-            {
-                cout << "Введите название файла для сохранения: ";
-                string Name;
-                cin >> Name;
-                Name += ".txt";
-                if (groupCS.size()>0) {
-                    ofstream fout;
-                    fout.open(Name, ios::out);
-                    if (fout.is_open())
-                    {
-                        fout << groupCS.size() << endl;
-                        for (auto& CS : groupCS)
-                            fout << CS.second;
-                        fout.close();
-                    }
-                }
-                else { cout << "Введите КС!"; }
-                break;
-            }
-            case 9:
-            {
-                cout << "Введите название файла для загрузки: ";
-                string Name;
-                cin >> Name;
-                Name += ".txt";
-                ifstream InFile;
-                InFile.open(Name, ios::in);
-                if (!InFile.is_open())
-                    cout << "Файл не может быть открыт!\n";
-                else {
-                    groupP.erase(groupP.begin(), groupP.end());
-                    int i;
-                    InFile >> i;
-                    for (int j = 1; j <= i; ++j)
-                    {
-                        pipe P;
-                        InFile >> P;
-                        groupP.insert(pair<int, pipe>(P.GetId(), P));
-                    }
-                    InFile.close();
-                }
-                break;
-            }
-            case 10:
-            {
-                cout << "Введите название файла для загрузки: ";
-                string Name;
-                cin >> Name;
-                Name += ".txt";
-                ifstream fin;
-                fin.open(Name, ios::in);
-                if (!fin.is_open())
-                    cout << "Файл не может быть открыт!\n";
-                else {
-                    int i;
-                    fin >> i;
-                    groupCS.erase(groupCS.begin(), groupCS.end());
-                    for (int j = 1; j <= i; ++j)
-                    {
-                        compressor_station cs;
-                        fin >> cs;
-                        groupCS.insert(pair<int, compressor_station>(cs.GetId(), cs));
-                    }
-                    fin.close();
-                }
                 break;
             }
             case 11:
@@ -473,10 +385,9 @@ int main()
                 string str;
                 cout << "Введите название файла: ";
                 cin >> str;
-                InputGraphFromFile(Graph, str);
+                InputGraphFromFile(Graph, groupP, groupCS, str);
 
                 system("pause");
-                break;
                 break;
             }
             case 19:
@@ -484,7 +395,7 @@ int main()
                 string str;
                 cout << "Введите название файла: ";
                 cin >> str;
-                OutputGraphToFile(Graph, str);
+                OutputGraphToFile(Graph, groupP, groupCS, str);
 
                 system("pause");
                 break;
